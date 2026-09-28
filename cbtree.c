@@ -60,7 +60,7 @@ void cb_ancestors(const CBTree *p, int idx)
         while (idx > 0) {
                 idx = (idx - 1) / 2;
                 printf("%d\n", p->tree.a[idx]);
-        }
+        
         }/* Энд өвөг эцгийг олох үйлдлийг хийнэ үү */
 }
 
