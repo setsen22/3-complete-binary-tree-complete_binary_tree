@@ -1,5 +1,5 @@
 #include "DS.h"
-
+#include <stdio.h>
 /*
   p-ийн зааж буй CBTree-д x утгыг оруулна
 */
