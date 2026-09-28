@@ -5,7 +5,9 @@
 */
 void cb_push(CBTree *p, int x)
 {
-p->tree.a[p->tree.len] = x;
+if (p->tree.len >= 100)
+                return;
+        p->tree.a[p->tree.len] = x;
         p->tree.len++;        /* Энд оруулах үйлдлийг хийнэ үү */
 }
 
@@ -16,7 +18,7 @@ p->tree.a[p->tree.len] = x;
 int cb_left(const CBTree *p, int idx)
 {
 int l = 2 * idx + 1;
-        if (l > p->tree.len)
+        if (idx < 0 || l >= p->tree.len)
                 return -1;
         return l;        /* Энд зүүн хүүхдийн индексийг буцаах үйлдлийг хийнэ үү */
 }
@@ -28,7 +30,7 @@ int l = 2 * idx + 1;
 int cb_right(const CBTree *p, int idx)
 {
 int r = 2 * idx + 2;
-        if (r >= p->tree.len)
+        if (idx < 0 || r >= p->tree.len)
                 return -1;
         return r;        /* Энд баруун хүүхдийн индексийг буцаах үйлдлийг хийнэ үү */
 }
@@ -53,10 +55,13 @@ for (int i = 0; i < p->tree.len; i++)
 */
 void cb_ancestors(const CBTree *p, int idx)
 {
- while (idx > 0) {
-                printf("%d\n", p->tree.a[idx]);
+ if (idx < 0 || idx >= p->tree.len)
+                return;
+        while (idx > 0) {
                 idx = (idx - 1) / 2;
-        }        /* Энд өвөг эцгийг олох үйлдлийг хийнэ үү */
+                printf("%d\n", p->tree.a[idx]);
+        }
+        }/* Энд өвөг эцгийг олох үйлдлийг хийнэ үү */
 }
 
 /*
@@ -66,7 +71,8 @@ int cb_height(const CBTree *p)
 {
 int h = 0;
         int n = p->tree.len;
-        while (n > 1) {
+        while (n > 0) {
+                h++;
                 n /= 2;
         }
         return h;        /* Энд өндрийг олох үйлдлийг хийнэ */
@@ -79,11 +85,12 @@ int h = 0;
 */
 int cb_sibling(const CBTree *p, int idx)
 {
-if (idx <= 0)
+if (idx <= 0 || idx >= p->tree.len)
                 return -1;
-        if (idx % 2 == 1)
-                return idx - 1;
-        return idx + 1;        /* Энд ах, дүүг олох үйлдлийг хийнэ үү */
+        int s = (idx % 2 == 1) ? idx + 1 : idx - 1;
+        if (s >= p->tree.len)
+                return -1;
+        return s;       /* Энд ах, дүүг олох үйлдлийг хийнэ үү */
 }
 
 /*
@@ -92,7 +99,7 @@ if (idx <= 0)
 */
 void cb_preorder(const CBTree *p, int idx)
 {
-if (idx < 0 || idx >= p->tree.len)
+ if (idx < 0 || idx >= p->tree.len)
                 return;
         printf("%d\n", p->tree.a[idx]);
         cb_preorder(p, cb_left(p, idx));
@@ -105,7 +112,7 @@ if (idx < 0 || idx >= p->tree.len)
 */
 void cb_inorder(const CBTree *p, int idx)
 {
-if (idx < 0 || idx >= p->tree.len)
+ if (idx < 0 || idx >= p->tree.len)
                 return;
         cb_inorder(p, cb_left(p, idx));
         printf("%d\n", p->tree.a[idx]);
@@ -120,9 +127,9 @@ void cb_postorder(const CBTree *p, int idx)
 {
 if (idx < 0 || idx >= p->tree.len)
                 return;
-        printf("%d\n", p->tree.a[idx]);
         cb_postorder(p, cb_left(p, idx));
-        cb_postorder(p, cb_right(p, idx));        /* Энд post-order-оор хэвлэх үйлдлийг хийнэ үү */
+        cb_postorder(p, cb_right(p, idx));
+        printf("%d\n", p->tree.a[idx]);         /* Энд post-order-оор хэвлэх үйлдлийг хийнэ үү */
 }
 
 /*
@@ -141,7 +148,7 @@ if (idx < 0 || idx >= p->tree.len)
                 return;
         }
         cb_leaves(p, l);
-        cb_leaves(p, r);        /* Энд навчуудыг үйлдлийг хийнэ үү */
+        cb_leaves(p, r);       /* Энд навчуудыг үйлдлийг хийнэ үү */
 }
 
 /*
@@ -151,7 +158,10 @@ if (idx < 0 || idx >= p->tree.len)
 */
 void cb_descendants(const CBTree *p, int idx)
 {
-cb_preorder(p, idx);        /* Энд үр садыг олох үйлдлийг хийнэ үү */
+if (idx < 0 || idx >= p->tree.len)
+                return;
+        cb_preorder(p, cb_left(p, idx));        /* засвар 6: idx өөрөө орохгүй */
+        cb_preorder(p, cb_right(p, idx));       /* Энд үр садыг олох үйлдлийг хийнэ үү */
 }
 
 
@@ -161,7 +171,7 @@ cb_preorder(p, idx);        /* Энд үр садыг олох үйлдлийг 
 */
 int cb_size(const CBTree *p)
 {
-return p->tree.len;        /* Энд хэмжээг олох үйлдлийг хийнэ үү */	
+ return p->tree.len;       /* Энд хэмжээг олох үйлдлийг хийнэ үү */	
 }
 
 
@@ -174,7 +184,7 @@ int cb_level(const CBTree *p, int x)
 int idx = cb_search(p, x);
         if (idx == -1)
                 return -1;
-        int level = 1;                  /* алдаа 7 */
+        int level = 0;
         while (idx > 0) {
                 idx = (idx - 1) / 2;
                 level++;
